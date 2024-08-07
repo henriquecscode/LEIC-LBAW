@@ -1,0 +1,1 @@
+<li><a href="{{ url('question/' . $question->id) }}"> {{ $question->title }} </a></li>

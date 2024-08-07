@@ -1,0 +1,1804 @@
+openapi: 3.0.0
+
+info:
+  version: "1.0"
+  title: "Trivial Web API"
+  description: "Web Resources Specification (A7) for Trivial"
+
+servers:
+  - url: localhost:8000
+    description: Development server
+
+tags:
+  - name: "M01: Autenticação"
+  - name: "M02: Perfil"
+  - name: "M03: Subscrições"
+  - name: "M04: Procura"
+  - name: "M05: Criação de questão"
+  - name: "M06: Interação: votos e comentários"
+  - name: "M07: Feed"
+  - name: "M08: Páginas estáticas e homepage"
+  - name: "M09: Administração e moderação"
+
+components:
+  schemas:
+    member:
+      type: object
+      required:
+        - id
+        - nome
+      properties:
+        id:
+          type: integer
+        nome:
+          type: string
+
+    postBody:
+      type: object
+      required:
+        - id
+        - text
+        - time
+        - member
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+        time:
+          type: string
+          format: date-time
+        member:
+          $ref: '#/components/schemas/member'
+
+    categories:
+      type: array
+      items:
+        type: object
+        required:
+          - id
+          - name
+        properties:
+          id:
+            type: integer
+          name:
+            type: string
+            
+    badge:
+      type: object
+      required:
+        - id
+        - name
+        - description
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+
+    badgeOwnership:
+      allOf:
+        - $ref: "#/components/schemas/badge"
+        - type: object
+          required:
+            - ownership
+          properties:
+            ownership:
+              type: boolean
+
+    notificationBody:
+      type: object
+      required:
+        - id
+        - content
+        - time
+      properties:
+        id:
+          type: integer
+        content:
+          type: string
+        time:
+          type: string
+          format: date-time
+
+    textNotification:
+      $ref: "#/components/schemas/notificationBody"
+
+    postNotification:
+      allOf:
+        - $ref: "#/components/schemas/notificationBody"
+        - type: object
+          required:
+            - post
+          properties:
+            post:
+              $ref: "#/components/schemas/postBody"
+
+    badgeNotification:
+      allOf:
+        - $ref: "#/components/schemas/notificationBody"
+        - type: object
+          required:
+            - badge
+          properties:
+            badge:
+              $ref: "#/components/schemas/badge"
+
+    generalNotification:
+      oneOf:
+        - $ref: "#/components/schemas/textNotification"
+        - $ref: "#/components/schemas/postNotification"
+        - $ref: "#/components/schemas/badgeNotification"
+
+  examples:
+
+
+    badge1:
+      value:
+        id: 1
+        name: "10 likes"
+        description: "Get 10 likes across all your posts"
+
+    badges:
+      value:
+        - id: 1
+          name: "10 likes"
+          description: "Get 10 likes across all your posts"
+        - id: 2
+          name: "100 likes"
+          description: "Get 100 likes across all your posts"
+        - id: 3
+          name: "1000 likes"
+          description: "Get 1000 likes across all your posts"
+        - id: 4
+          name: "1 question"
+          description: "Post 1 question"
+        - id: 5
+          name: "1 question"
+          description: "Post 10 questions"
+        - id: 6
+          name: "1 question"
+          description: "Post 100 questions"
+        - id: 7
+          name: "1 comment"
+          description: "Post 1 comment"
+        - id: 8
+          name: "10 comments"
+          description: "Post 10 comments"
+        - id: 9
+          name: "100 comments"
+          description: "Post 100 comments"
+
+    badgesOwnership:
+      value:
+        - id: 1
+          name: "10 likes"
+          description: "Get 10 likes across all your posts"
+          ownership: true
+        - id: 2
+          name: "100 likes"
+          description: "Get 100 likes across all your posts"
+          ownership: false
+        - id: 3
+          name: "1000 likes"
+          description: "Get 1000 likes across all your posts"
+          ownership: false
+        - id: 4
+          name: "1 question"
+          description: "Post 1 question"
+          ownership: true
+        - id: 5
+          name: "1 question"
+          description: "Post 10 questions"
+          ownership: true
+        - id: 6
+          name: "1 question"
+          description: "Post 100 questions"
+          ownership: true
+        - id: 7
+          name: "1 comment"
+          description: "Post 1 comment"
+          ownership: false
+        - id: 8
+          name: "10 comments"
+          description: "Post 10 comments"
+          ownership: false
+        - id: 9
+          name: "100 comments"
+          description: "Post 100 comments"
+          ownership: false
+
+    postBody1:
+      value:
+        id: 1
+        text: "How did you get on this platform?"
+        time: "2021-12-16T18:37:10"
+
+    textNotification1:
+      value:
+        id: 1
+        content: "Update to our ToS"
+        time: "2021-12-16T16:50:10"
+
+    textNotification2:
+      value:
+        id: 4
+        content: "Updates to our application"
+        time: "2021-12-16T17:14:10"
+
+    postNotification1:
+      value:
+        id: 2
+        content: "New post added"
+        post:
+          $ref: "#/components/examples/postBody1"
+
+    badgeNotification1:
+      value:
+        id: 3
+        content: "You have received a new badge"
+        badge:
+          $ref: "#/components/examples/badge1"
+
+    generalNotifications1:
+      value:
+        - id: 1
+          content: "Update to our ToS"
+          time: "2021-12-16T16:50:10"
+        - id: 2
+          content: "New post added"
+          post:
+            $ref: "#/components/examples/postBody1"
+        - id: 3
+          content: "You have received a new badge"
+          badge:
+            $ref: "#/components/examples/badge1"
+
+paths:
+  # M01
+  /login:
+    get:
+      operationId: R101
+      summary: "R101: Login Form"
+      description: "Login form. Access: MMB"
+      tags:
+        - "M01: Autenticação"
+      responses:
+        "200":
+          description: "Ok. Display log-in form"
+
+    post:
+      operationId: R102
+      summary: "R102: Login action"
+      description: "Submit login information for server authentication. Access: PUB"
+      tags:
+        - "M01: Autenticação"
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+
+      responses:
+        "302":
+          description: "Redirect after verifying user authentication details."
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Authentication successful. Redirect to main page"
+                  value: "/feed"
+                302Error:
+                  description: "Authentication failed. Redirect to login form"
+                  value: "/login"
+
+  /logout:
+    get:
+      operationId: R103
+      summary: "R103: Logout Action"
+      description: "Logout the current authenticated used. Access: MMB"
+      tags:
+        - "M01: Autenticação"
+      responses:
+        "200":
+          description: "Ok. Logged out. Back to main page."
+
+  /register:
+    get:
+      operationId: R104
+      summary: "R104: Register Form"
+      description: "Show the user the register form. Access: PUB"
+      tags:
+        - "M01: Autenticação"
+      responses:
+        "200":
+          description: "Ok. Display register form."
+
+    post:
+      operationId: R105
+      summary: "R105: Register action"
+      description: "Submit register information. Access Pub."
+      tags:
+        - "M01: Autenticação"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                birth_date:
+                  type: string
+                  format: date
+                bio:
+                  type: string
+              required:
+                - name
+                - email
+                - password
+      responses:
+        "302":
+          description: "Redirect after processing user registation details."
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Registation successful. Redirect to profile page"
+                  value: "/feed"
+                302Error:
+                  description: "Registation failed. Retrying"
+                  value: "/register"
+
+  # M02
+
+  /members/{id}:
+    get:
+      operationId: R201
+      summary: "R201: View member profile"
+      description: "Show the profile of the member. Access: PUB"
+      tags:
+        - "M02: Perfil"
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        "200":
+          description: "Ok. Showing member profile"
+
+  /members/{id}/edit:
+    get:
+      operationId: R202
+      summary: "R202: View edit form member profile"
+      description: "Show the profile edit form. Access: OWN, ADM"
+      tags:
+        - "M02: Perfil"
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        "200":
+          description: "Ok. Showing member profile"
+
+    post:
+      operationId: R203
+      summary: "R203: Edit member profile"
+      description: "Edit member's profile. Access: OWN, ADM"
+      tags:
+        - "M02: Perfil"
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                birth_date:
+                  type: string
+                  format: date
+                photo:
+                  type: string
+                  format: binary
+                bio:
+                  type: string
+
+      responses:
+        "302":
+          description: "Redirect after attempting to update member profile"
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Success. Redirecting to profile page"
+                  value: "/members/{id}"
+                302Error:
+                  description: "Error. Redirecting to profile page"
+                  value: "/members/{id}"
+
+  /appeal:
+    get:
+      operationId: R204
+      summary: "R204: Appeal form"
+      description: "View the appeal form. Access: MMB"
+      tags:
+        - "M02: Perfil"
+
+      responses:
+        "200":
+          description: "Ok. Showing appeal page"
+
+    post:
+      operationId: R205
+      summary: "R205: Appeal action"
+      description: "Appeal the block and give a justification. Access MMB"
+      tags:
+        - "M02: Perfil"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+
+      responses:
+        "302":
+          description: "Redirected after sending appeal"
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Appeal successful. Redirecting to profile page"
+                  value: "/members/{id}"
+                302Error:
+                  description: "Appeal unsuccessful"
+                  value: "/appeal"
+
+  /self/subscriptions/post:
+    get:
+      operationId: R206
+      summary: "R206: Subscribed posts"
+      description: "View posts that the member is subscribing to. Access MMB"
+      tags:
+        - "M02: Perfil"
+
+
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - title
+                  properties:
+                    id:
+                      type: integer
+                    text:
+                      type: string
+                    categories:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - id
+                          - name
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                example:
+                  - id: 1231
+                    text: "How to solve this exercise?"
+                    categories:
+                      - id: 2
+                        name: "math"
+                      - id: 3
+                        name: "algebra"
+                  - id: 2345
+                    text: "How do plants grow?"
+                    categories:
+                      - id: 4
+                        name: "biology"
+                  - id: 2695
+                    text: "If you want to do that, you should first wear your gloves"
+
+  /self/subscriptions/members:
+    get:
+      operationId: R207
+      summary: "R207: Subscribed members"
+      description: "View other members that the member is subscribing to. Access MMB"
+      tags:
+        - "M02: Perfil"
+
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                example:
+                  - id: 1
+                    name: "Andre"
+                  - id: 2
+                    name: "Bea"
+
+  /self/subscriptions/categories:
+    get:
+      operationId: R208
+      summary: "R208: Subscribed categories"
+      description: "View categories that the member is subscribing to. Access MMB"
+      tags:
+        - "M02: Perfil"
+
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - name
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+
+                example:
+                  - id: 2
+                    name: "math"
+                  - id: 3
+                    name: "algebra"
+                  - id: 4
+                    name: "biology"
+
+  /self/questions:
+    get:
+      operationId: R209
+      summary: "R209: My questions"
+      description: "View the questions that the members has made. Access: MMB"
+      tags:
+        - "M02: Perfil"
+
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - text
+                  properties:
+                    id:
+                      type: integer
+                    text:
+                      type: string
+                    categories:
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - id
+                          - name
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                example:
+                  - id: 1231
+                    text: "How to solve this exercise?"
+                    categories:
+                      - id: 2
+                        name: "math"
+                      - id: 3
+                        name: "algebra"
+                  - id: 2345
+                    text: "How do plants grow?"
+                    categories:
+                      - id: 4
+                        name: "biology"
+
+  /self/comments:
+    get:
+      operationId: R210
+      summary: "R210: My comments"
+      description: "View the comments that the members has made. Access: MMB"
+      tags:
+        - "M02: Perfil"
+
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - text
+                  properties:
+                    id:
+                      type: integer
+                    text:
+                      type: string
+
+                example:
+                  - id: 67054
+                    text: "I'd also like an answer to that"
+                  - id: 124432
+                    text: "The answer is 3"
+
+  /self/badges:
+    get:
+      operationId: R211
+      summary: "R211: My badges"
+      description: "View the badges that the member has. Access: MMB"
+      tags:
+        - "M02: Perfil"
+
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/badgeOwnership"
+              examples:
+                badgesOwnership:
+                  $ref: "#/components/examples/badgesOwnership"
+
+  /self/notifications:
+    get:
+      operationId: R212
+      summary: "R212: My notifications"
+      description: "View the notifications that the member has. Access: MMB"
+      tags:
+        - "M02: Perfil"
+
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/generalNotification"
+              examples:
+                selfNotifications:
+                  $ref: "#/components/examples/generalNotifications1"
+
+  /removeAccount/{id}:
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        "200":
+          description: "Success"
+
+    post:
+      operationId: R213
+      summary: "  R213: Remove account action"
+      description: "Submit password for server confirmation of account removal: Access: OWN, ADM"
+      tags:
+        - "M02: Perfil"
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+
+      responses:
+        "302":
+          description: "Redirect after processing account removal"
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Removal successful. Redirect to main page"
+                  value: ""
+                302Error:
+                  description: "Account removal failed"
+                  value: "/removeAccount/{id}"
+
+
+  # M03 - Subscrições
+  # subscribe post (post /members/<member_id>/subscriptions/post/<post_id>)
+  /subscriptions/post/{post_id}:
+    post:
+      operationId: R301
+      summary: 'R301: Subscribe post'
+      description: 'Subscription of a post. Access: MMB.'
+
+      tags: 
+        - 'M03: Subscrições'
+
+      parameters:
+        - in: path
+          name: post_id
+          description: Id of the post to subscribe
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing subscription.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing subscription.'
+                  value: '/post/{post_id}'
+                302Error:
+                  description: "Couldn't subscribe."
+                  value: '/post/{post_id}'
+
+  # unsubscribe post (post /members/<member_id>/subscriptions/post/<post_id>)
+  /unsubscriptions/post/{post_id}:
+    post:
+      operationId: R302
+      summary: 'R302: Unsubscribe post'
+      description: 'Unsubscription of a post. Access: MMB.'
+
+      tags: 
+        - 'M03: Subscrições'
+
+      parameters:
+        - in: path
+          name: post_id
+          description: Id of the post to unsubscribe
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing unsubscription.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing unsubscription.'
+                  value: '/post/{post_id}'
+                302Error:
+                  description: "Couldn't unsubscribe."
+                  value: '/post/{post_id}'
+
+  # subscribe members  (post /members/<member_id>/subscriptions/members/<member_id>)
+  /subscriptions/members/{member_id}:
+    post:
+      operationId: R303
+      summary: 'R303: Subscribe member'
+      description: 'Subscription of a member. Access: MMB.'
+
+      tags: 
+        - 'M03: Subscrições'
+
+      parameters:
+        - in: path
+          name: member_id
+          description: Id of the member to subscribe
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing subscription.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing subscription.'
+                  value: '/members/{member_id}'
+                302Error:
+                  description: "Couldn't subscribe."
+                  value: '/members/{member_id}'
+
+  # unsubscribe members  (post /members/<member_id>/subscriptions/members/<member_id>)
+  /unsubscriptions/members/{member_id}:
+    post:
+      operationId: R304
+      summary: 'R304: Unsubscribe member'
+      description: 'Unsubscription of a member. Access: MMB.'
+
+      tags: 
+        - 'M03: Subscrições'
+
+      parameters:
+        - in: path
+          name: member_id
+          description: Id of the member to unsubscribe
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing unsubscription.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing unsubscription.'
+                  value: '/members/{member_id}'
+                302Error:
+                  description: "Couldn't unsubscribe."
+                  value: '/members/{member_id}'
+
+  # subscribe categories  (post /members/<member_id>/subscriptions/categories/<category_id>)
+  /subscriptions/categories/{category_id}:
+    post:
+      operationId: R305
+      summary: 'R305: Subscribe category'
+      description: 'Subscription of a category. Access: MMB.'
+
+      tags: 
+        - 'M03: Subscrições'
+
+      parameters:
+        - in: path
+          name: category_id
+          description: Id of the category to subscribe
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing subscription.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing subscription.'
+                  value: '/categories/{category_id}'
+                302Error:
+                  description: "Couldn't subscribe."
+                  value: '/categories/{category_id}'
+
+  # unsubscribe categories  (post /members/<member_id>/subscriptions/categories/<category_id>)
+  /unsubscriptions/categories/{category_id}:
+    post:
+      operationId: R306
+      summary: 'R306: Unsubscribe category'
+      description: 'Unsubscription of a category. Access: MMB.'
+
+      tags: 
+        - 'M03: Subscrições'
+
+      parameters:
+        - in: path
+          name: category_id
+          description: Id of the category to unsubscribe
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing unsubscription.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing unsubscription.'
+                  value: '/categories/{category_id}'
+                302Error:
+                  description: "Couldn't unsubscribe."
+                  value: '/categories/{category_id}'
+
+  # M04
+
+  /questions/byVotes:
+    get:
+      operationId: R401
+      summary: 'R401: Order questions by votes'
+      description: 'Fetches questions from the database sorted by the amount of votes. Access PUB.'
+      tags:
+        - "M04: Procura"
+      responses:
+        "200":
+          description: 'OK. Showing questions by vote'
+
+  /questions/byNotAnswered:
+    get:
+      operationId: R402
+      summary: 'R402: Order questions by not answered'
+      description: 'Fetches questions from the database sorted by those who require an answer still. Access PUB.'
+      tags:
+        - "M04: Procura"
+
+      responses:
+        "200":
+          description: 'OK. Showing questions by not answered'
+
+
+
+  /questions/byTime:
+    get:
+      operationId: R403
+      summary: 'R403: Order questions by time'
+      description: 'Fetches questions from the database sorted by the date. Access PUB.'
+      tags:
+        - "M04: Procura"
+      responses:
+        "200":
+          description: 'OK. Showing questions by time'
+
+
+  /questions/category/{id}:
+    get:
+      operationId: R404
+      summary: 'R404: Category questions'
+      description: 'Views the questions from a category. Access PUB.'
+      tags:
+        - "M04: Procura"
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        "200":
+          description: 'OK. Showing category category questions'
+
+
+  /questions/category/{id}/byVotes:
+    get:
+      operationId: R405
+      summary: 'R405: Category questions by votes'
+      description: 'Fetches questions in a certain category sorted by the amount of votes. Access PUB.'
+      tags:
+        - "M04: Procura"
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        "200":
+          description: 'OK. Showing category questions by votes'
+
+
+  /questions/category/{id}/byNotAnswered:
+    get:
+      operationId: R406
+      summary: 'R406: Category questions by not answered'
+      description: 'Fetches questions in a certain category sorted by those who require an answer still. Access PUB.'
+      tags:
+        - "M04: Procura"
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        "200":
+          description: 'OK. Showing category questions by not answered'
+
+
+
+  /questions/category/{id}/byTime:
+    get:
+      operationId: R407
+      summary: 'R407: Category questions by time'
+      description: 'Fetches questions from the database sorted by the date. Access PUB.'
+      tags:
+        - "M04: Procura"
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        "200":
+          description: 'OK. Showing category questions by time'
+
+
+  /question/{id}:
+    get:
+      operationId: R408
+      summary: 'R408: View question'
+      description: 'View the question and all its related content. Access: PUB.'
+      tags:
+        - "M04: Procura"
+
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        "200":
+          description: 'OK. Showing question page'
+
+  /search:
+    get:
+      operationId: R409
+      summary: 'R409: Search questions'
+      description: 'Searches for question with given parameters. Access PUB.'
+      tags:
+        - "M04: Procura"
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - search
+              properties:
+                title:
+                  type: string
+
+      responses:
+        "200":
+          description: 'OK. Showing search results'
+
+  # M05
+  /create_question:
+    get:
+      operationId: R501
+      summary: 'R501: Create question form'
+      description: 'Create a question. Access: MMB'
+      tags: 
+        - 'M05: Criação de questão'
+      responses:
+        '200':
+          description: 'Ok. Get form to question creation'
+
+    post: 
+      operationId: R502
+      summary: 'R502: Create question action'
+      description: 'Submit question information. Access: PUB'
+      tags: 
+        - 'M05: Criação de questão'
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                conteudo:
+                  type: string
+                categoria:
+                  type: array
+                  items: 
+                    type: string
+              required:
+              - titulo
+              - conteudo
+              - categoria
+      
+      responses:
+        '302':
+          description: 'Redirect after sending question form.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples: 
+                302Success:
+                  description: 'Question submited successfully. Redirect to question page'
+                  value: '/question/{question_id}'
+                302Error:
+                  description: 'Question form error. Redirect to form'
+                  value: '/create_question'
+
+  /question/edit_question/{question_id}:
+    get:
+      operationId: R503
+      summary: 'R503: Edit question'
+      description: 'Edit question content. Access: OWN'
+      tags:
+        - 'M05: Criação de questão'
+      responses:
+        '200':
+          description: 'Ok. Show question edit form'
+
+    post:
+      operationId: R504
+      summary: 'R504: Edit question action'
+      description: 'Submit edited question. Access: PUB'
+      tags:
+        - 'M05: Criação de questão'
+ 
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                conteudo:
+                  type: string
+                categoria:
+                  type: array
+                  items: 
+                    type: string
+              required:
+              - titulo
+              - conteudo
+
+      responses:
+        '302':
+          description: 'Redirect after sending edited question.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302 Success:
+                  description: 'Successfully edited question. Redirect to question'
+                  value: '/question/{question_id}'
+                302 Error:
+                  description: 'Failed editing quastion. Redirect to form.'
+                  value: '/edit_question'
+  
+  /question/resolve/{question_id}:
+    post:
+      operationId: R505
+      summary: 'R505: Resolve'
+      description: 'Resolve a question. Access: OWN.'
+
+      tags: 
+        - 'M05: Criação de questão'
+
+      parameters:
+        - in: path
+          name: question_id
+          description: Id of the question to resolve
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing question.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing question resolve.'
+                  value: '/question/{question_id}'
+                302Error:
+                  description: "Couldn't resolve the question"
+                  value: '/question/<question_id>'
+
+  /question/remove_question/{question_id}:
+    post:
+      operationId: R506 
+      summary: 'R506: Remove'
+      description: 'Removes the question. Access: OWN, MOD, ADM'
+
+      tags: 
+        - 'M05: Criação de questão'
+
+      parameters:
+        - in: path
+          name: question_id
+          description: Id of the question to remove
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing question.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after deleting the question'
+                  value: '/question/<question_id>'
+                302Error:
+                  description: "Couldn't resolve the question"
+                  value: '/question/<question_id>'
+ 
+# M06 - Interações
+# vote/{post_id} (post 1, 0, -1)
+  /question/{post_id}/vote/{value}:
+    post:
+      operationId: R601
+      summary: "R601: Voting Action"
+      description: "Voting a post. Access: MMB"
+      tags:
+        - "M06: Interação: votos e comentários"
+
+      parameters:
+        - in: path
+          name: post_id
+          schema:
+            type: integer
+          required: true
+        - in: path
+          name: value
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: "Update after processing the new post information."
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Voting successful. Refresh page. Reload likes number"
+                  value: "question/{question_id}/"
+                302Error:
+                  description: "Couldn't vote"
+                  value: '/question/{question_id}'
+
+# comment (post with parent id /comment/create/<parent_id>)
+  /comment/create/{parent_id}:
+    post:
+      operationId: R602
+      summary: "R602: Commenting Action"
+      description: "Commenting a post. Access: MMB"
+      tags:
+        - "M06: Interação: votos e comentários"
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                conteudo:
+                  type: string
+              required:
+                - conteudo
+      
+      parameters:
+        - in: path
+          name: parent_id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: "Update after processing the new comment"
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Commenting successful. Refresh page."
+                  value: "/question/{question_id}"
+                302Error:
+                  description: "Couldn't comment the post."
+                  value: '/question/{question_id}'
+      
+
+# edit_comment (post with comment id /comment/edit/<comment_id>)
+  /comment/edit/{comment_id}:
+    post:
+      operationId: R603
+      summary: "R603: Editing comment action."
+      description: "Voting a post. Access: OWN"
+      tags:
+        - "M06: Interação: votos e comentários"
+
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                comment_text:
+                  type: string
+              required:
+                - comment_text
+
+      parameters:
+        - in: path
+          name: comment_id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: "Update after processing the comment editions"
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Comment edited successfully."
+                  value: '/question/{question_id}'
+                302Error:
+                  description: "Couldn't edit the comment."
+                  value: '/question/{question_id}'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  content:
+                    type: string
+                required:
+                  - id
+                  - content
+
+# remove comment (post with comment id /comment/remove/<comment_id>)
+  /comment/remove/{comment_id}:
+    post:
+      operationId: R604
+      summary: "R604: Removing comment action."
+      description: "Removing a comment. Access: OWN, ADM, MOD"
+      tags:
+        - "M06: Interação: votos e comentários"
+
+      parameters:
+        - in: path
+          name: comment_id
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: "Update after removing comment"
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: "Comment removed successfully."
+                  value: '/question/{question_id}'
+                302Error:
+                  description: "Couldn't remove the comment."
+                  value: '/question/{question_id}'
+
+  # M07
+  /feed:
+    get:
+      operationId: R701
+      summary: 'R701: Feed'
+      description: 'Feed with questions of interest. Returns the results as JSON. Access: MMB.'
+
+      tags:
+        - 'M07: Feed'
+
+      responses:
+        "200":
+          description: 'OK. Showing feed page'
+ 
+
+  # M08
+  # Ver contacts
+  /contactos:
+    get:
+      operationId: R801
+      summary: 'R801: Contact us'
+      description: 'Contact us page. Access: PUB.'
+
+      tags: 
+        - 'M08: Páginas estáticas e homepage'
+      responses:
+         '200':
+           description: 'Ok. Show sign-up contact us UI'
+
+  # Ver FAQ
+  /faqs:
+    get:
+      operationId: R802
+      summary: 'R802: FAQS'
+      description: 'FAQS page. Access: PUB.'
+
+      tags: 
+        - 'M08: Páginas estáticas e homepage'
+      responses:
+         '200':
+           description: 'Ok. Show sign-up FAQS UI'
+
+  # Ver about us
+  /about_us:
+    get:
+      operationId: R803
+      summary: 'R803: About us'
+      description: 'About us page. Access: PUB.'
+
+      tags: 
+        - 'M08: Páginas estáticas e homepage'
+      responses:
+         '200':
+           description: 'Ok. Show sign-up about us UI'
+           
+
+  # M09
+  #View reports ()
+  /reports:
+    get:
+      operationId: R901
+      summary: 'R901: Getting all reports'
+      description: 'Searches for all reports the results as JSON. Access: ADM.'
+
+      tags: 
+        - 'M09: Administração e moderação'
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    post_id:
+                      type: string
+                    report_date:
+                      type: string
+                    motive:
+                      type: string
+                example:
+                  - id: 1
+                    post_id: 2
+                    report_date: 11-28-2021
+                    motive: a resposta não explica como chegou lá
+
+  #View appeals
+  /appeals:
+    get:
+      operationId: R902
+      summary: 'R902: Getting all appeals'
+      description: 'Searches for all appeals the results as JSON. Access: ADM.'
+
+      tags: 
+        - 'M09: Administração e moderação'
+
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id_member:
+                      type: string
+                    appeal_text:
+                      type: string
+                example:
+                  - id_member: 1
+                    appeal_text: Não é justo
+                    
+
+  #Block 
+  /blocks/members/{member_id}:
+    post:
+      operationId: R903
+      summary: 'R903: Block'
+      description: 'Blocking a member. Access: ADM.'
+
+      tags: 
+        - 'M09: Administração e moderação'
+
+      parameters:
+        - in: query
+          name: member_id
+          description: Id of the member to block
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing block.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing block.'
+                  value: '/members/{member_id}'
+                302Error:
+                  description: "Couldn't block the user"
+                  value: '/members/{member_id}'
+
+  #Unblock
+  /unblocks/members/{member_id}:
+    post:
+      operationId: R904
+      summary: 'R904: Unblock'
+      description: 'Unblock member. Access: ADM.'
+
+      tags: 
+        - 'M09: Administração e moderação'
+
+      parameters:
+        - in: query
+          name: member_id
+          description: Id of the member to unblock
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing block.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing unblock.'
+                  value: '/members/{member_id}'
+                302Error:
+                  description: "Couldn't unblock the user"
+                  value: '/members/{member_id}'
+
+  #Get categories (takes to edition page)
+  #Post categories (operation over tags. May do multiple upon request)
+  /edit_categories:
+    get:
+      operationId: R905
+      summary: 'R905: Add category Form'
+      description: 'Provide an add category form. Access: ADM'
+      tags:
+        - 'M09: Administração e moderação'
+      responses:
+        '200':
+          description: 'Ok. Show log-in UI'
+    post:
+      operationId: R906
+      summary: 'R906: Add category Action'
+      description: 'Processes the new category. Access: ADM'
+      tags:
+        - 'M09: Administração e moderação'
+ 
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - name
+ 
+      responses:
+        '302':
+          description: 'Redirect after processing the new category.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302 Success:
+                  description: 'Successfully added new category.'
+                  value: '/edit_categories'
+                302 Error:
+                  description: 'Failed added new category. Redirect to form.'
+                  value: '/edit_categories'
+
+  #Add mod
+  /moderators/add_moderator/{member_id}:
+    post:
+      operationId: R907
+      summary: 'R907: Add moderator'
+      description: 'Add a moderator. Access: ADM.'
+
+      tags: 
+        - 'M09: Administração e moderação'
+
+      parameters:
+        - in: query
+          name: member_id
+          description: Member id of the new moderator
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing new moderator.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing new moderator.'
+                  value: '/members/{member_id}'
+                302Error:
+                  description: "Couldn't add new moderator"
+                  value: '/members/{member_id}'
+
+  #Remove mod
+  /moderators/remove_moderator/{member_id}:
+    post:
+      operationId: R908
+      summary: 'R908: Remove moderator'
+      description: 'Remove a moderator. Access: ADM.'
+
+      tags: 
+        - 'M09: Administração e moderação'
+
+      parameters:
+        - in: query
+          name: member_id
+          description: Member id of the old moderator
+          schema:
+            type: integer
+          required: true
+
+      responses:
+        '302':
+          description: 'Redirect after processing old moderator.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Redirect after processing old moderator.'
+                  value: '/members/{member_id}'
+                302Error:
+                  description: "Couldn't remove moderator"
+                  value: '/members/{member_id}'
+
+  #Admin Page
+  /admin:
+    get:
+      operationId: R909
+      summary: 'R909: ADMIN'
+      description: 'Admin page. Access: ADM.'
+
+      tags: 
+        - 'M08: Páginas estáticas e homepage'
+      responses:
+         '200':
+           description: 'Ok. Show admin page'
