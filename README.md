@@ -1,7 +1,7 @@
 # Trivial
 
 # # Project developed for LBAW class. By:
-- Eunice Amorim
+- [Eunice Amorim](https://github.com/eunicejamorim)
 - [Henrique Sousa (Self)](https://github.com/henriquecscode)
 - Luísa Araújo
 - Maria Almeida
